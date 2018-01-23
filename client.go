@@ -23,7 +23,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/masami10/paho.mqtt.golang/packets"
+	"strings"
 )
 
 const (
@@ -516,6 +517,32 @@ func (c *client) Publish(topic string, qos byte, retained bool, payload interfac
 	return token
 }
 
+
+func localSharedTopictoNormal(topic string) string {
+	topicList := strings.Split(topic, "/")
+	ret :=""
+	for i := 0; i < len(topicList); {
+		if topicList[i] == "$local" {
+			i++
+			continue
+		}
+		if topicList[i] == "$share" {
+			i += 2 //为了跳过share group name
+			continue
+		}
+		if i != len(topicList) -1 {
+			ret += topicList[i] + "/"
+		} else {
+			ret += topicList[i]
+		}
+		i++
+
+	}
+
+	return ret
+
+}
+
 // Subscribe starts a new subscription. Provide a MessageHandler to be executed when
 // a message is published on the topic provided.
 func (c *client) Subscribe(topic string, qos byte, callback MessageHandler) Token {
@@ -527,6 +554,7 @@ func (c *client) Subscribe(topic string, qos byte, callback MessageHandler) Toke
 		return token
 	}
 	sub := packets.NewControlPacket(packets.Subscribe).(*packets.SubscribePacket)
+
 	if err := validateTopicAndQos(topic, qos); err != nil {
 		token.err = err
 		return token
@@ -536,7 +564,8 @@ func (c *client) Subscribe(topic string, qos byte, callback MessageHandler) Toke
 	DEBUG.Println(CLI, sub.String())
 
 	if callback != nil {
-		c.msgRouter.addRoute(topic, callback)
+		rTopic := localSharedTopictoNormal(topic) //修改路由topic
+		c.msgRouter.addRoute(rTopic, callback)
 	}
 
 	token.subs = append(token.subs, topic)
@@ -564,7 +593,8 @@ func (c *client) SubscribeMultiple(filters map[string]byte, callback MessageHand
 
 	if callback != nil {
 		for topic := range filters {
-			c.msgRouter.addRoute(topic, callback)
+			rTopic := localSharedTopictoNormal(topic) //修改路由topic
+			c.msgRouter.addRoute(rTopic, callback)
 		}
 	}
 	token.subs = make([]string, len(sub.Topics))

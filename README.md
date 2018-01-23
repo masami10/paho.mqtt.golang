@@ -15,7 +15,7 @@ Installation and Build
 This client is designed to work with the standard Go tools, so installation is as easy as:
 
 ```
-go get github.com/eclipse/paho.mqtt.golang
+go get github.com/masami10/paho.mqtt.golang
 ```
 
 The client depends on Google's [websockets](https://godoc.org/golang.org/x/net/websocket) and [proxy](https://godoc.org/golang.org/x/net/proxy) package, 
@@ -31,11 +31,11 @@ Usage and API
 -------------
 
 Detailed API documentation is available by using to godoc tool, or can be browsed online
-using the [godoc.org](http://godoc.org/github.com/eclipse/paho.mqtt.golang) service.
+using the [godoc.org](http://godoc.org/github.com/masami10/paho.mqtt.golang) service.
 
 Make use of the library by importing it in your Go client source code. For example,
 ```
-import "github.com/eclipse/paho.mqtt.golang"
+import "github.com/masami10/paho.mqtt.golang"
 ```
 
 Samples are available in the `cmd` directory for reference.
@@ -50,7 +50,7 @@ Tracing is enabled by assigning logs (from the Go log package) to the logging en
 Reporting bugs
 --------------
 
-Please report bugs by raising issues for this project in github https://github.com/eclipse/paho.mqtt.golang/issues 
+Please report bugs by raising issues for this project in github https://github.com/masami10/paho.mqtt.golang/issues
 
 
 More information

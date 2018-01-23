@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/masami10/paho.mqtt.golang/packets"
 )
 
 const (

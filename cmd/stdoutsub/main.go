@@ -18,6 +18,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"log"
 	//"log"
 	"os"
 	"os/signal"
@@ -25,7 +26,7 @@ import (
 	"syscall"
 	"time"
 
-	MQTT "github.com/eclipse/paho.mqtt.golang"
+	MQTT "github.com/masami10/paho.mqtt.golang"
 )
 
 func onMessageReceived(client MQTT.Client, message MQTT.Message) {
@@ -35,8 +36,8 @@ func onMessageReceived(client MQTT.Client, message MQTT.Message) {
 var i int64
 
 func main() {
-	//MQTT.DEBUG = log.New(os.Stdout, "", 0)
-	//MQTT.ERROR = log.New(os.Stdout, "", 0)
+	MQTT.DEBUG = log.New(os.Stdout, "debug", 0)
+	MQTT.ERROR = log.New(os.Stdout, "error", 0)
 	c := make(chan os.Signal, 1)
 	i = 0
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -49,8 +50,8 @@ func main() {
 	hostname, _ := os.Hostname()
 
 	server := flag.String("server", "tcp://127.0.0.1:1883", "The full url of the MQTT server to connect to ex: tcp://127.0.0.1:1883")
-	topic := flag.String("topic", "#", "Topic to subscribe to")
-	qos := flag.Int("qos", 0, "The QoS to subscribe to messages at")
+	topic := flag.String("topic", "$local/$share/group/empoweriot/devices/+/telemetry", "Topic to subscribe to")
+	qos := flag.Int("qos", 1, "The QoS to subscribe to messages at")
 	clientid := flag.String("clientid", hostname+strconv.Itoa(time.Now().Second()), "A clientid for the connection")
 	username := flag.String("username", "", "A username to authenticate to the MQTT server")
 	password := flag.String("password", "", "Password to match username")
@@ -62,12 +63,16 @@ func main() {
 		Username:             *username,
 		Password:             *password,
 		MaxReconnectInterval: 1 * time.Second,
-		KeepAlive:            30 * time.Second,
+		KeepAlive:            60 * time.Second,
 		TLSConfig:            tls.Config{InsecureSkipVerify: true, ClientAuth: tls.NoClientCert},
+		ProtocolVersion:      3,
+		AutoReconnect:        true,
 	}
 	connOpts.AddBroker(*server)
+	t := map[string]byte{}
+	t[*topic] = byte(*qos)
 	connOpts.OnConnect = func(c MQTT.Client) {
-		if token := c.Subscribe(*topic, byte(*qos), onMessageReceived); token.Wait() && token.Error() != nil {
+		if token := c.SubscribeMultiple(t, onMessageReceived); token.Wait() && token.Error() != nil {
 			panic(token.Error())
 		}
 	}

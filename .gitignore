@@ -2,6 +2,7 @@
 *.o
 *.a
 *.so
+.idea
 
 # Folders
 _obj
@@ -34,3 +35,14 @@ samples/simple
 samples/stdinpub
 samples/stdoutsub
 samples/routing
+
+cmd/trivial
+cmd/trivial2
+cmd/sample
+cmd/reconnect
+cmd/ssl
+cmd/custom_store
+cmd/simple
+cmd/stdinpub
+cmd/stdoutsub
+cmd/routing
